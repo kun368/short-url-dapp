@@ -27,13 +27,16 @@ export default class PlatformIntro2 extends Component {
         }}
       >
         <div style={styles.body}>
-          <h2 style={styles.title}>高效的内容创作工具</h2>
+          <h2 style={styles.title}>强大的缩短网址服务</h2>
           <p style={styles.text}>
-            聚集全网最新鲜的创意，直击用户需求<br />海量优质素材，快速锁定优质商品、图片、视频<br />发布前内容质量诊断，内容编辑更高效
+              短网址服务可以帮您把长长的网址压缩
+            <br />
+              让您在微博微信消息中包含更多有趣内容！
+              <br />
           </p>
         </div>
         <img
-          src="https://img.alicdn.com/tfs/TB1DzIrRVXXXXckXFXXXXXXXXXX-1740-800.png"
+          src="http://zzkun-tuchuang.oss-cn-hangzhou.aliyuncs.com/18-5-12/96324973.jpg"
           alt=""
           width="870"
           height="400"

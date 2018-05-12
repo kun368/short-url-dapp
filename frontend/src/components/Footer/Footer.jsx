@@ -26,7 +26,7 @@ export default () => {
           textAlign: 'right',
         }}
       >
-        阿里巴巴集团
+        CodeKun
         <br />
         © 2018 版权所有
       </div>

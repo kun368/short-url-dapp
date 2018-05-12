@@ -24,32 +24,35 @@ export default class PlatformJoinUs extends Component {
         style={{
           ...styles.wrapper,
           backgroundImage:
-            'url(https://img.alicdn.com/tfs/TB1Iw2ZRVXXXXb4aFXXXXXXXXXX-2760-1544.png)',
+            'url(http://zzkun-tuchuang.oss-cn-hangzhou.aliyuncs.com/18-5-12/83979194.jpg)',
         }}
       >
         <div>
           <div style={styles.titleWrapper}>
-            <h2 style={styles.title}>现在就加入我们</h2>
-            <p>
-              在人工智能将替代一切的未来<br />唯有内容的创作无可替代
+            <h2 style={styles.title}>现在就开始使用</h2>
+            <p style={{color: '#fff'}}>
+              在区块链将世界万物结合的未来
+                <br />
+                体验安全、去中心、不可篡改的服务
             </p>
           </div>
           <div style={styles.buttons}>
-            <Button
-              style={styles.secondaryButton}
-              type="normal"
-              component="a"
-              href="your-url"
-            >
-              开通
-            </Button>
+            {/*<Button*/}
+              {/*style={styles.secondaryButton}*/}
+              {/*type="normal"*/}
+              {/*component="a"*/}
+              {/*href="your-url"*/}
+            {/*>*/}
+              {/*开通*/}
+            {/*</Button>*/}
             <Button
               style={styles.primaryButton}
               type="primary"
               component="a"
-              href="your-url"
+              href="https://incentive.nebulas.io/cn/signup.html?invite=OILxo"
+              target="_blank"
             >
-              登录
+              我也要开发去中心化应用
             </Button>
           </div>
         </div>
@@ -71,7 +74,7 @@ const styles = {
   },
   title: {
     fontSize: 32,
-    color: '#333',
+    color: '#fff',
     letterSpacing: '2px',
     lineHeight: '48px',
     textAlign: 'center',

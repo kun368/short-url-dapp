@@ -18,11 +18,11 @@ export default class Home extends Component {
   render() {
     return (
       <div className="home-page" style={{ background: '#fff' }}>
-        {/*<Header />*/}
+        <Header />
         <PlatformLanding />
         <PlatformToolsIntro />
-        <PlatformIntro />
-        <PlatformBlackIntro />
+        {/*<PlatformIntro />*/}
+        {/*<PlatformBlackIntro />*/}
         <PlatformJoinus />
         <Footer />
       </div>

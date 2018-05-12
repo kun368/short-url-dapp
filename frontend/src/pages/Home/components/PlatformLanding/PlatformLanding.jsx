@@ -39,21 +39,20 @@ export default class PlatformLanding extends Component {
         return typeof(webExtensionWallet) !== "undefined";
     };
 
-    executeIntervalQuery = (serialNumber, preUrl) => {
+    executeIntervalQuery = (txhash, preUrl) => {
         const thiz = this;
         const intervalQuery = setInterval(function () {
-            nebPay.queryPayInfo(serialNumber)
-                .then(resp => {
-                    const respObject = JSON.parse(resp);
-                    console.log("tx result: ", respObject);
-                    if (respObject.code === 0) {
-                        clearInterval(intervalQuery);
-                        thiz.queryShortResult(preUrl);
-                    }
-                })
-                .catch(function (err) {
-                    console.log(err);
-                });
+            axios.post(`https://${netConfig}.nebulas.io/v1/user/getTransactionReceipt`, {
+                hash: txhash
+            }).then(response => {
+                let t = response.data.result.status;
+                if (t === 1) {
+                    clearInterval(intervalQuery);
+                    thiz.queryShortResult(preUrl);
+                }
+            }).catch(function (error) {
+                console.log('error', error);
+            });
         }, 5000);
     };
 
@@ -69,28 +68,37 @@ export default class PlatformLanding extends Component {
                 "args": `["${preUrl}"]`,
                 "function": 'toShort'
             }
-        })
-            .then(response => {
-                let t = response.data.result.result;
-                let json = JSON.parse(t);
-                this.setState({
-                    shortResult: "http://" + window.location.host + "/" + json.short
-                });
-
-                Toast.success(`已获得您的短URL，并已自动复制到剪贴板！`);
-            })
-            .catch(function (error) {
-                console.log('error', error);
+        }).then(response => {
+            let t = response.data.result.result;
+            console.log(t);
+            let json = JSON.parse(t);
+            this.setState({
+                shortResult: "http://" + window.location.host + "/" + json.short
             });
+            window.clipboardData.setData("Text", this.state.shortResult);
+            Toast.success(`已将短网址复制到剪贴板！`);
+        }).catch(function (error) {
+            console.log('error', error);
+        });
     };
 
+    checkValidLink = (url) => {
+        const urlRegex = /^(https?|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/;
+        let regExp = new RegExp(urlRegex);
+        return regExp.test(url);
+    };
 
     onSearch = (value) => {
         const preUrl = value.key;
-        console.log(preUrl);
-
+        if (!this.checkValidLink(preUrl)) {
+            this.setState({
+                shortResult: ''
+            });
+            Toast.error("您输入的不是标准URL链接，请重新输入");
+            return;
+        }
         if (!this.checkInstalledPlugin()) {
-            Toast.error("请先安装WebExtensionWallet插件！");
+            Toast.error("请先安装Chrome浏览器扩展，页面左上角有下载地址");
             return;
         }
         console.log(preUrl, from, dappAddress);
@@ -103,7 +111,7 @@ export default class PlatformLanding extends Component {
                 console.log("response of push: ", resp);
                 if (JSON.stringify(resp).indexOf("Error") === -1) {
                     Toast.success("已提交交易！");
-                    this.executeIntervalQuery(serialNumber, preUrl);
+                    this.executeIntervalQuery(resp.txhash, preUrl);
                 }
             }
         });
@@ -118,38 +126,23 @@ export default class PlatformLanding extends Component {
                         星云短网址服务
                     </h2>
                     <span style={styles.title2}>
-                        简单 / 易用 / 便捷
+                        简单易用&nbsp;&nbsp;/&nbsp;&nbsp;
+                        永不丢失&nbsp;&nbsp;/&nbsp;&nbsp;
+                        无法篡改
                     </span>
                     <Search
                         onSearch={this.onSearch.bind(this)}
                         size="large"
                         searchText="缩短网址"
                         hasIcon={false}
+                        placeholder="请输入原始网址"
                         autoWidth
                     />
-                    {
-                        this.state.shortResult.length === 0 ? ('') : (
-                            <h1>{this.state.shortResult}</h1>
-                        )
-                    }
-                    <div style={styles.buttons}>
-                        <Button
-                            style={styles.secondaryButton}
-                            type="normal"
-                            component="a"
-                            href="your-url"
-                        >
-                            开通
-                        </Button>
-                        <Button
-                            style={styles.primaryButton}
-                            type="primary"
-                            component="a"
-                            href="your-url"
-                        >
-                            登录
-                        </Button>
-                    </div>
+                    {this.state.shortResult.length === 0 ? ('') : (
+                        <span style={styles.title2}>短网址：
+                            <a href={this.state.shortResult} target="_blank">{this.state.shortResult}</a>
+                        </span>
+                    )}
                 </div>
             </div>
         );
@@ -188,7 +181,6 @@ const styles = {
     },
     title2: {
         color: '#333',
-        letterSpacing: '2px',
         textAlign: 'center',
         lineHeight: '48px',
     },
