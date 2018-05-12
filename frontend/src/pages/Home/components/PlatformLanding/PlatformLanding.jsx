@@ -75,8 +75,7 @@ export default class PlatformLanding extends Component {
             this.setState({
                 shortResult: "http://" + window.location.host + "/" + json.short
             });
-            // window.clipboardData.setData("Text", this.state.shortResult);
-            Toast.success(`已将短网址复制到剪贴板！`);
+            Toast.success(`生成短网址成功！`);
         }).catch(function (error) {
             console.log('error', error);
         });
