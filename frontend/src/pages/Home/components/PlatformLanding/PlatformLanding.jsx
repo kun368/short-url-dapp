@@ -4,8 +4,8 @@ import {Button, Search, Feedback} from '@icedesign/base';
 import NebPay from 'nebpay.js'
 import axios from 'axios';
 
-const dappAddress = "n1tV65X8J5jvxMu86cxBqFJE9fz6HhCLfwD";
-const netConfig = "testnet";
+const dappAddress = "n1iJMbSL3FsdHuwhtPws4wdiDPDeWguyALU";
+const netConfig = "mainnet";
 
 const nebulas = require("nebulas");
 const Account = nebulas.Account;

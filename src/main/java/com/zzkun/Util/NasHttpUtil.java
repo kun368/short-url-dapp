@@ -11,9 +11,9 @@ public class NasHttpUtil {
     private static final MediaType JSON_TYPE = MediaType.parse("application/json; charset=utf-8");
     private static final OkHttpClient CLIENT = new OkHttpClient();
 
-    private static final String CALL_ADDRESS = "https://testnet.nebulas.io/v1/user/call";
-    private static final String USER_ADDRESS = "n1Vx6iSFM12aJWZw7Q9nTNsDWaX16kXrtsG";
-    private static final String DAPP_ADDRESS = "n1tV65X8J5jvxMu86cxBqFJE9fz6HhCLfwD";
+    private static final String CALL_ADDRESS = "https://mainnet.nebulas.io/v1/user/call";
+    private static final String USER_ADDRESS = "n1ZTecB8Tpb7X7LBL7j3ZcGLVvMrXmVfLfy";
+    private static final String DAPP_ADDRESS = "n1iJMbSL3FsdHuwhtPws4wdiDPDeWguyALU";
 
     public static String toLong(String shortUrl) {
         try {

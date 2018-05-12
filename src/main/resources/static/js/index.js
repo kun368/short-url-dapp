@@ -46569,8 +46569,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 
 
-var dappAddress = "n1tV65X8J5jvxMu86cxBqFJE9fz6HhCLfwD";
-var netConfig = "testnet";
+var dappAddress = "n1iJMbSL3FsdHuwhtPws4wdiDPDeWguyALU";
+var netConfig = "mainnet";
 
 var nebulas = __webpack_require__(502);
 var Account = nebulas.Account;
