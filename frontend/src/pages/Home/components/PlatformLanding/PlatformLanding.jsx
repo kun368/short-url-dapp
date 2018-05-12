@@ -1,10 +1,19 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Button, Search, Feedback} from '@icedesign/base';
+import NebPay from 'nebpay.js'
+import axios from 'axios';
 
-const dappAddress = "n22WUXD8sDqRTbhd6229N4GC4stDv8PMnWs";
-const netConfig = "mainnet";
+const dappAddress = "n1tV65X8J5jvxMu86cxBqFJE9fz6HhCLfwD";
+const netConfig = "testnet";
 
+const nebulas = require("nebulas");
+const Account = nebulas.Account;
+const neb = new nebulas.Neb();
+neb.setRequest(new nebulas.HttpRequest(`https://${netConfig}.nebulas.io`));
+const from = Account.NewAccount().getAddressString();
+
+const nebPay = new NebPay();
 const Toast = Feedback.toast;
 
 export default class PlatformLanding extends Component {
@@ -21,8 +30,7 @@ export default class PlatformLanding extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            overlayVisible: false,
-            value: "111222",
+            shortResult: ""
         };
     }
 
@@ -30,6 +38,52 @@ export default class PlatformLanding extends Component {
     checkInstalledPlugin = () => {
         return typeof(webExtensionWallet) !== "undefined";
     };
+
+    executeIntervalQuery = (serialNumber, preUrl) => {
+        const thiz = this;
+        const intervalQuery = setInterval(function () {
+            nebPay.queryPayInfo(serialNumber)
+                .then(resp => {
+                    const respObject = JSON.parse(resp);
+                    console.log("tx result: ", respObject);
+                    if (respObject.code === 0) {
+                        clearInterval(intervalQuery);
+                        thiz.queryShortResult(preUrl);
+                    }
+                })
+                .catch(function (err) {
+                    console.log(err);
+                });
+        }, 5000);
+    };
+
+    queryShortResult = (preUrl) => {
+        axios.post(`https://${netConfig}.nebulas.io/v1/user/call`, {
+            "from": from,
+            "to": dappAddress,
+            "value": "0",
+            "nonce": 0,
+            "gasPrice": "1000000",
+            "gasLimit": "2000000",
+            "contract": {
+                "args": `["${preUrl}"]`,
+                "function": 'toShort'
+            }
+        })
+            .then(response => {
+                let t = response.data.result.result;
+                let json = JSON.parse(t);
+                this.setState({
+                    shortResult: "http://" + window.location.host + "/" + json.short
+                });
+
+                Toast.success(`已获得您的短URL，并已自动复制到剪贴板！`);
+            })
+            .catch(function (error) {
+                console.log('error', error);
+            });
+    };
+
 
     onSearch = (value) => {
         const preUrl = value.key;
@@ -39,41 +93,21 @@ export default class PlatformLanding extends Component {
             Toast.error("请先安装WebExtensionWallet插件！");
             return;
         }
-        const nebulas = require("nebulas");
-        const Account = nebulas.Account;
-        const neb = new nebulas.Neb();
-        neb.setRequest(new nebulas.HttpRequest(`https://${netConfig}.nebulas.io`));
-
-        const from = Account.NewAccount().getAddressString();
         console.log(preUrl, from, dappAddress);
-
         const contract = {
-            function: 'voteFor',
-            args: `["${selectedItem}"]`
+            function: 'addItem',
+            args: `["${preUrl}"]`
         };
-
-        window.postMessage({
-            "target": "contentscript",
-            "data": {
-                "to": dappAddress,
-                "value": "0",
-                "contract": {
-                    "function": contract.function,
-                    "args": contract.args
+        const serialNumber = nebPay.call(dappAddress, "0", contract.function, contract.args, {
+            listener: (resp) => {
+                console.log("response of push: ", resp);
+                if (JSON.stringify(resp).indexOf("Error") === -1) {
+                    Toast.success("已提交交易！");
+                    this.executeIntervalQuery(serialNumber, preUrl);
                 }
-            },
-            "method": "neb_sendTransaction",
-        }, "*");
-        window.addEventListener('message', function (e) {
-            console.log("message received, msg.data: " + JSON.stringify(e.data));
-            try {
-                if (!!e.data.data.txhash) {
-                    console.log("Transaction hash:\n" + JSON.stringify(e.data.data.txhash, null, '\t'));
-                }
-            } catch (e) {
             }
         });
-        Toast.success("已发起交易，提交后Status变为Success即投票成功！")
+        Toast.success("已发起交易，请确认交易！")
     };
 
     render() {
@@ -93,6 +127,11 @@ export default class PlatformLanding extends Component {
                         hasIcon={false}
                         autoWidth
                     />
+                    {
+                        this.state.shortResult.length === 0 ? ('') : (
+                            <h1>{this.state.shortResult}</h1>
+                        )
+                    }
                     <div style={styles.buttons}>
                         <Button
                             style={styles.secondaryButton}

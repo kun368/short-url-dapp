@@ -10,6 +10,7 @@
     "@icedesign/menu": "^0.1.0",
     "@icedesign/skin": "^0.1.0",
     "axios": "^0.18.0",
+    "nebpay.js": "0.0.1",
     "nebulas": "^0.4.8",
     "prop-types": "^15.5.8",
     "react-router": "^4.2.0",

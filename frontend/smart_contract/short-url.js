@@ -54,10 +54,10 @@ ShortUrl.prototype = {
         this.counter = new BigNumber(1);
     },
 
-    toShort: function (longUrl) {
+    addItem: function (longUrl) {
         var item = this.longMap.get(longUrl);
         if (item) {
-            return item;
+            return;
         }
         item = new Item();
         item.long = longUrl;
@@ -68,13 +68,20 @@ ShortUrl.prototype = {
         this.longMap.put(item.long, item);
         this.shortMap.put(item.short, item);
         this.counter = this.counter.plus(1);
+    },
+
+    toShort: function (longUrl) {
+        var item = this.longMap.get(longUrl);
+        if (!item) {
+            throw new Error("not exist.");
+        }
         return item;
     },
 
     toLong: function (shortUrl) {
         var item = this.shortMap.get(shortUrl);
         if (!item) {
-            throw new Error("shortUrl not exist.");
+            throw new Error("not exist.");
         }
         return item;
     }
