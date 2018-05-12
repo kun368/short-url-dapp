@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  short-url-dapp-server:
+    image: kun368/short-url-dapp:master
+    restart: always
+    ports:
+      - "8110:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
