@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {Button, Search, Feedback} from '@icedesign/base';
-import NebPay from 'nebpay.js'
 import axios from 'axios';
+import Clipboard from 'clipboard';
 
 const dappAddress = "n1iJMbSL3FsdHuwhtPws4wdiDPDeWguyALU";
 const netConfig = "mainnet";
@@ -13,8 +13,8 @@ const neb = new nebulas.Neb();
 neb.setRequest(new nebulas.HttpRequest(`https://${netConfig}.nebulas.io`));
 const from = Account.NewAccount().getAddressString();
 
-const nebPay = new NebPay();
 const Toast = Feedback.toast;
+const clipboard = new Clipboard('#copyBtn');
 
 export default class PlatformLanding extends Component {
     static displayName = 'PlatformLanding';
@@ -75,7 +75,7 @@ export default class PlatformLanding extends Component {
             this.setState({
                 shortResult: "http://" + window.location.host + "/" + json.short
             });
-            window.clipboardData.setData("Text", this.state.shortResult);
+            // window.clipboardData.setData("Text", this.state.shortResult);
             Toast.success(`已将短网址复制到剪贴板！`);
         }).catch(function (error) {
             console.log('error', error);
@@ -86,6 +86,10 @@ export default class PlatformLanding extends Component {
         const urlRegex = /^(https?|ftp|file):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]$/;
         let regExp = new RegExp(urlRegex);
         return regExp.test(url);
+    };
+
+    clickCopyBtn = () => {
+        Toast.success('已将短网址复制到剪切板');
     };
 
     onSearch = (value) => {
@@ -106,13 +110,30 @@ export default class PlatformLanding extends Component {
             function: 'addItem',
             args: `["${preUrl}"]`
         };
-        const serialNumber = nebPay.call(dappAddress, "0", contract.function, contract.args, {
-            listener: (resp) => {
-                console.log("response of push: ", resp);
-                if (JSON.stringify(resp).indexOf("Error") === -1) {
-                    Toast.success("已提交交易！");
-                    this.executeIntervalQuery(resp.txhash, preUrl);
+        window.postMessage({
+            "target": "contentscript",
+            "data": {
+                "to": dappAddress,
+                "value": "0",
+                "contract": {
+                    "function": contract.function,
+                    "args": contract.args
                 }
+            },
+            "method": "neb_sendTransaction",
+        }, "*");
+        window.addEventListener('message', resp => {
+            console.log("response of push: ", resp);
+            try {
+                const dat = resp.data.data;
+                if (!!dat.txhash) {
+                    console.log("Transaction hash:\n" + JSON.stringify(dat.txhash, null, '\t'));
+                    if (JSON.stringify(dat).indexOf("Error") === -1) {
+                        Toast.success("已提交交易！");
+                        this.executeIntervalQuery(dat.txhash.txhash, preUrl);
+                    }
+                }
+            } catch (e) {
             }
         });
         Toast.success("已发起交易，请确认交易！")
@@ -140,7 +161,17 @@ export default class PlatformLanding extends Component {
                     />
                     {this.state.shortResult.length === 0 ? ('') : (
                         <span style={styles.title2}>短网址：
-                            <a href={this.state.shortResult} target="_blank">{this.state.shortResult}</a>
+                            <a href={this.state.shortResult} target="_blank" id="foo">
+                                {this.state.shortResult}
+                            </a>
+                            &nbsp;&nbsp;&nbsp;
+                            <Button
+                                size="small"
+                                type="primary"
+                                data-clipboard-target="#foo"
+                                onClick={this.clickCopyBtn.bind(this)}
+                                id="copyBtn">复制
+                            </Button>
                         </span>
                     )}
                 </div>
